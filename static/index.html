@@ -4,21 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>H-Transpiler - Gemini Destekli Kod Çevirici</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-between p-6">
 
-    <!-- Üst Başlık -->
     <header class="w-full max-w-6xl text-center my-4">
         <h1 class="text-3xl font-extrabold tracking-tight text-indigo-400">H-Transpiler</h1>
         <p class="text-sm text-slate-400 mt-1">Gemini 3.5 Flash Lite Destekli Haskell Tabanlı Kod Çevirici</p>
-    </header>
-
-    <!-- Ana Arayüz (İki Kutu) -->
+    </header
+        
     <main class="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow">
         
-        <!-- Sol Kutu: Kaynak Kod & Ayarlar -->
         <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col shadow-xl">
             <div class="flex flex-col gap-3 mb-4">
                 <div>
@@ -47,7 +43,6 @@
             </button>
         </div>
 
-        <!-- Sağ Kutu: Çevrilen Kod -->
         <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col shadow-xl">
             <div class="flex justify-between items-center mb-4">
                 <label class="block text-xs font-semibold uppercase text-slate-400">Çevrilen Kod Çıktısı</label>
@@ -61,12 +56,10 @@
 
     </main>
 
-    <!-- Alt Bilgi -->
     <footer class="w-full max-w-6xl text-center text-xs text-slate-600 mt-6">
-        HıX5eT Games &bull; H-Transpiler Projesi
+        HıX5eT &bull; H-Transpiler Projesi
     </footer>
 
-    <!-- İstek Mantığı (Tarayıcıdan direkt Gemini API'ye güvenli fetch isteği) -->
     <script>
         async function translateCode() {
             const apiKey = document.getElementById('apiKey').value.trim();
@@ -108,7 +101,6 @@
 
                 if (data.candidates && data.candidates[0].content.parts[0].text) {
                     let cleanText = data.candidates[0].content.parts[0].text;
-                    // Markdown kod blokları (```cpp vb.) geldiyse temizleyelim
                     cleanText = cleanText.replace(/^```[a-z]*\n/i, '').replace(/```$/, '').trim();
                     outputElement.textContent = cleanText;
                 } else if (data.error) {
