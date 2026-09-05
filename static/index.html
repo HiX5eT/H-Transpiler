@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H-Transpiler - Gemini Destekli Kod Çevirici</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-between p-6">
+
+    <!-- Üst Başlık -->
+    <header class="w-full max-w-6xl text-center my-4">
+        <h1 class="text-3xl font-extrabold tracking-tight text-indigo-400">H-Transpiler</h1>
+        <p class="text-sm text-slate-400 mt-1">Gemini 3.5 Flash Lite Destekli Haskell Tabanlı Kod Çevirici</p>
+    </header>
+
+    <!-- Ana Arayüz (İki Kutu) -->
+    <main class="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow">
+        
+        <!-- Sol Kutu: Kaynak Kod & Ayarlar -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col shadow-xl">
+            <div class="flex flex-col gap-3 mb-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Gemini API Key</label>
+                    <input type="password" id="apiKey" placeholder="AIzaSy..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
+                </div>
+                <div class="flex gap-3">
+                    <div class="flex-1">
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Kaynak Dil (Opsiyonel)</label>
+                        <input type="text" id="sourceLang" placeholder="Örn: Python" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Hedef Dil</label>
+                        <input type="text" id="targetLang" placeholder="Örn: C++, Rust, Assembly" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-grow flex flex-col">
+                <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Kaynak Kod</label>
+                <textarea id="sourceCode" placeholder="Çevrilmesini istediğiniz kodu buraya yapıştırın (çok satırlı destekler)..." class="w-full flex-grow bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-sm resize-none focus:outline-none focus:border-indigo-500"></textarea>
+            </div>
+
+            <button onclick="translateCode()" class="mt-4 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-lg transition-all shadow-lg cursor-pointer">
+                Kodu Çevir 🚀
+            </button>
+        </div>
+
+        <!-- Sağ Kutu: Çevrilen Kod -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col shadow-xl">
+            <div class="flex justify-between items-center mb-4">
+                <label class="block text-xs font-semibold uppercase text-slate-400">Çevrilen Kod Çıktısı</label>
+                <button onclick="copyCode()" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium cursor-pointer">Kopyala</button>
+            </div>
+            
+            <div class="flex-grow bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-sm overflow-auto relative">
+                <pre id="outputCode" class="text-slate-300 whitespace-pre-wrap">Çeviri sonucu burada görünecek...</pre>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Alt Bilgi -->
+    <footer class="w-full max-w-6xl text-center text-xs text-slate-600 mt-6">
+        HıX5eT Games &bull; H-Transpiler Projesi
+    </footer>
+
+    <!-- İstek Mantığı (Tarayıcıdan direkt Gemini API'ye güvenli fetch isteği) -->
+    <script>
+        async function translateCode() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const targetLang = document.getElementById('targetLang').value.trim();
+            const sourceCode = document.getElementById('sourceCode').value;
+            const outputElement = document.getElementById('outputCode');
+
+            if (!apiKey) {
+                alert("Lütfen Gemini API Key girin!");
+                return;
+            }
+            if (!targetLang) {
+                alert("Lütfen hedef dili belirtin!");
+                return;
+            }
+            if (!sourceCode) {
+                alert("Lütfen çevrilecek kaynak kodu girin!");
+                return;
+            }
+
+            outputElement.textContent = "Çevriliyor, lütfen bekleyin...";
+
+            const prompt = `Aşağıdaki kaynak kodunu ${targetLang} diline çevir. Sadece çevrilen saf kodu ver, markdown blokları veya başka hiçbir açıklama ekleme:\n\n${sourceCode}`;
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{ text: prompt }]
+                        }]
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    let cleanText = data.candidates[0].content.parts[0].text;
+                    // Markdown kod blokları (```cpp vb.) geldiyse temizleyelim
+                    cleanText = cleanText.replace(/^```[a-z]*\n/i, '').replace(/```$/, '').trim();
+                    outputElement.textContent = cleanText;
+                } else if (data.error) {
+                    outputElement.textContent = "API Hatası: " + data.error.message;
+                } else {
+                    outputElement.textContent = "Beklenmeyen yanıt yapısı alındı.";
+                }
+            } catch (error) {
+                outputElement.textContent = "Bağlantı hatası oluştu: " + error.message;
+            }
+        }
+
+        function copyCode() {
+            const codeText = document.getElementById('outputCode').textContent;
+            navigator.clipboard.writeText(codeText);
+            alert("Çevrilen kod panoya kopyalandı!");
+        }
+    </script>
+</body>
+</html>
