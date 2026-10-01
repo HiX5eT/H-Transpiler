@@ -1,0 +1,29 @@
+name: Build Windows Executable
+
+on:
+  push:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Haskell
+      uses: haskell-actions/setup@v2
+      with:
+        ghc-version: '9.8.2'
+        cabal-version: 'latest'
+
+    - name: Build Executable
+      run: cabal build
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: H-Transpiler-Windows
+        path: dist-newstyle/build/**/H-Transpiler.exe
