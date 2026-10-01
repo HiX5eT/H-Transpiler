@@ -16,7 +16,7 @@ jobs:
     - name: Set up Haskell
       uses: haskell-actions/setup@v2
       with:
-        ghc-version: '9.8.2'
+        ghc-version: '9.10.2'
         cabal-version: 'latest'
 
     - name: Build Executable
